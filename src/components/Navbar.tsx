@@ -30,7 +30,7 @@ export const Navbar = ({ session }: { session: Session | null }) => {
                 <Dashboard session={session} />
 
                 <Link
-                  href="/upload"
+                  href="/upload-project"
                   className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
                 >
                   Upload Project
@@ -39,7 +39,6 @@ export const Navbar = ({ session }: { session: Session | null }) => {
             )}
 
             {!session && <SignIn />}
-            
           </div>
 
           {/* Mobile Menu Button */}
@@ -64,7 +63,7 @@ export const Navbar = ({ session }: { session: Session | null }) => {
                 <Dashboard session={session} />
 
                 <Link
-                  href="/upload"
+                  href="/upload-project"
                   className="block text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
                 >
                   Upload Project

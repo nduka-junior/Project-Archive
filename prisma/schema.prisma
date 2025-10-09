@@ -1,8 +1,4 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+// prisma/schema.prisma
 
 generator client {
   provider = "prisma-client-js"
@@ -14,26 +10,33 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ==============================
+// USER MODEL
+// ==============================
 model User {
-  id            String   @id
+  id            String   @id @default(cuid())
   name          String
   email         String   @unique
   emailVerified Boolean  @default(false)
   image         String?
   createdAt     DateTime @default(now())
-  updatedAt     DateTime @default(now()) @updatedAt
+  updatedAt     DateTime @updatedAt
 
   sessions Session[]
   accounts Account[]
-  profile  Profile?  @relation("UserProfile") // 👈 Relation name declared here
+  profile  Profile?
+  projects Project[]
 
   @@map("user")
 }
 
+// ==============================
+// SESSION MODEL
+// ==============================
 model Session {
-  id        String   @id
+  id        String   @id @default(cuid())
   expiresAt DateTime
-  token     String
+  token     String   @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   ipAddress String?
@@ -41,12 +44,14 @@ model Session {
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([token])
   @@map("session")
 }
 
+// ==============================
+// ACCOUNT MODEL
+// ==============================
 model Account {
-  id                    String    @id
+  id                    String    @id @default(cuid())
   accountId             String
   providerId            String
   userId                String
@@ -64,21 +69,27 @@ model Account {
   @@map("account")
 }
 
+// ==============================
+// VERIFICATION MODEL
+// ==============================
 model Verification {
-  id         String   @id
+  id         String   @id @default(cuid())
   identifier String
   value      String
   expiresAt  DateTime
   createdAt  DateTime @default(now())
-  updatedAt  DateTime @default(now()) @updatedAt
+  updatedAt  DateTime @updatedAt
 
   @@map("verification")
 }
 
+// ==============================
+// PROFILE MODEL
+// ==============================
 model Profile {
   id     String @id @default(cuid())
   userId String @unique
-  user   User   @relation("UserProfile", fields: [userId], references: [id], onDelete: Cascade) // 👈 Same name used here
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   github   String? @db.VarChar(255)
   twitter  String? @db.VarChar(255)
@@ -87,4 +98,27 @@ model Profile {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@map("profile")
+}
+
+// ==============================
+// PROJECT MODEL
+// ==============================
+model Project {
+  id              String   @id @default(cuid())
+  title           String
+  description     String?
+  webLink         String?
+  githubLink      String?
+  documentUrl     String?
+  presentationUrl String?
+  tags            String[] @default([])
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("project")
 }
