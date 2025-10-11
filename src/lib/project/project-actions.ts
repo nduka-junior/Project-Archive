@@ -8,7 +8,7 @@ import { revalidatePath } from "next/cache";
 
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { UploadProjectInput, uploadProjectSchema } from "../types/UploadTypes";
-
+import { uploadFileToCloudinary } from "../cloudinary";
 
 const prisma = new PrismaClient();
 
@@ -72,6 +72,16 @@ const prisma = new PrismaClient();
 
 export async function uploadProjectAction(formData: UploadProjectInput) {
   try {
+    // ✅ Get current session
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+    if (!session?.user?.id) {
+      throw new Error(
+        "Unauthorized: You must be logged in to upload a project."
+      );
+    }
+
     // ✅ Validate input
     const parsed = uploadProjectSchema.parse(formData);
 
@@ -85,7 +95,7 @@ export async function uploadProjectAction(formData: UploadProjectInput) {
         tags: parsed.tags || [],
         documentUrl: formData.documentUrl,
         presentationUrl: formData.presentationUrl,
-        userId: parsed.userId,
+        userId: session.user.id, // ✅ always defined now
       },
     });
 

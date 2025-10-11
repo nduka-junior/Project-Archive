@@ -12,7 +12,7 @@ async function page() {
   if (!session) {
     redirect("/auth");
   }
-    return <UploadProjectClient session={session} />;
+  return <UploadProjectClient session={session} />;
 }
 
 export default page;

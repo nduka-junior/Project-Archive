@@ -55,7 +55,9 @@ export default function UploadProjectClient({ session }: { session: any }) {
   const handleFileChange = (key: "document" | "presentation", file?: File) =>
     setFiles((prev) => ({ ...prev, [key]: file }));
 
+  
   const onSubmit = (data: z.infer<typeof uploadProjectSchema>) => {
+    console.log("Submitting form with data:", data, "and files:", files);
     startTransition(async () => {
       try {
         // ✅ Upload files directly to Cloudinary (avoid body size limit)

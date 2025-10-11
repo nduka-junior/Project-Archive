@@ -8,7 +8,7 @@ export const uploadProjectSchema = z.object({
   tags: z.array(z.string()).optional(),
   document: z.any().optional(), // added
   presentation: z.any().optional(), // added
-  userId: z.string(),
+  userId: z.string().optional(),
 });
 
 export type UploadProjectInput = {
