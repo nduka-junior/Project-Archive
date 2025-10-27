@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Github, Sparkles } from "lucide-react";
+import { ArrowRight, Github, Link, Sparkles } from "lucide-react";
 
 export const Hero = () => {
   return (
@@ -45,14 +45,17 @@ export const Hero = () => {
               <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
             </Button>
 
-            <Button
-              size="lg"
-              variant="outline"
-              className="group border-2 border-primary/30 bg-background/50 backdrop-blur-sm text-lg px-8 py-6 hover:bg-primary/10 hover:border-primary/50 transition-all"
+         
+            <a
+              href="/upload-project" // <- absolute route with leading slash
+              className="inline-flex items-center justify-center border-2 border-primary/30 bg-background/50
+                 backdrop-blur-sm text-[15px] px-6 py-3 rounded-md text-foreground
+                 hover:bg-primary/10 hover:border-primary/50 transition-all group "
+              aria-label="Upload your project"
             >
               <Github className="mr-2 h-5 w-5" />
               Upload Your Project
-            </Button>
+            </a>
           </div>
 
           {/* Stats */}

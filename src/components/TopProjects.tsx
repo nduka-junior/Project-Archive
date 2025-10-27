@@ -135,17 +135,19 @@ export const TopProjects = () => {
         </div>
 
         <div className="text-center">
-          <Button
-            size="lg"
-            variant="outline"
-            className="border-2 border-primary/30 bg-background/50 backdrop-blur-sm hover:bg-primary/10 hover:border-primary/50"
+    
+          <a
+            href="/upload-project" // <- absolute route with leading slash
+            className="inline-flex items-center justify-center border-2 border-primary/30 bg-background/50
+                 backdrop-blur-sm text-[15px] px-5 py-2 rounded-md text-foreground
+                 hover:bg-primary/10 hover:border-primary/50 transition-all group "
+            aria-label="Upload your project"
           >
             View All Projects
-            <ArrowRight className="ml-2 h-5 w-5" />
-          </Button>
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </a>
         </div>
       </div>
     </section>
   );
 };
-

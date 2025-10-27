@@ -106,14 +106,14 @@ export async function uploadProjectAction(formData: UploadProjectInput) {
   }
 }
 
-export async function generateProjectMetadata(
-  title: string,
-  type: "tags" | "description"
-) {
-  try {
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+export async function generateProjectMetadata(title: string, type: "tags" | "description") {
+  if (!process.env.GEMINI_API_KEY) {
+    throw new Error("GEMINI_API_KEY is not set in environment variables.");
+  }
 
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+  try {
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     const prompt =
       type === "tags"
@@ -123,9 +123,52 @@ export async function generateProjectMetadata(
     const result = await model.generateContent(prompt);
     const text = result.response.text().trim();
 
-    return text;
+    return { success: true, data: text };
   } catch (error: any) {
     console.error("Gemini Error:", error);
-    return "Error generating content.";
+    return { success: false, error: error.message };
+  }
+}
+
+
+export async function getAllProjects() {
+  try {
+    const projects = await prisma.project.findMany({
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        tags: true,
+        webLink: true,
+        githubLink: true,
+
+        presentationUrl: true,
+        createdAt: true,
+      },
+    });
+
+    return { success: true, data: projects };
+  } catch (error) {
+    console.error("Prisma fetch error:", error);
+    return { success: false, error: "Failed to load projects" };
+  }
+}
+
+export async function getProjectById(id: string) {
+  try {
+    const project = await prisma.project.findUnique({
+      where: { id },
+      include: {
+        user: true, // if you have a user relation
+      },
+    });
+
+    if (!project) throw new Error("Project not found");
+
+    return project;
+  } catch (error) {
+    console.error("Error fetching project:", error);
+    throw new Error("Failed to fetch project");
   }
 }

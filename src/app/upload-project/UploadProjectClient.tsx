@@ -4,8 +4,8 @@ import { useTransition, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { uploadProjectAction } from "@/lib/project/project-actions";
 import { toast } from "sonner";
+
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -17,16 +17,22 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import { Loader2, Upload, X } from "lucide-react";
+import { Loader2, Sparkles, Upload, X } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
-import { uploadProjectSchema } from "@/lib/types/UploadTypes";
-import { uploadFileToCloudinary } from "@/lib/cloudinary";
 
+import { uploadFileToCloudinary } from "@/lib/cloudinary";
+import {
+  uploadProjectAction,
+  generateProjectMetadata,
+} from "@/lib/project/project-actions";
+import { uploadProjectSchema } from "@/lib/types/UploadTypes";
 
 export default function UploadProjectClient({ session }: { session: any }) {
   const [isPending, startTransition] = useTransition();
-  const [tagInput, setTagInput] = useState("");
+  const [isGeneratingTags, setIsGeneratingTags] = useState(false);
+  const [isGeneratingDescription, setIsGeneratingDescription] = useState(false);
   const [tags, setTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState("");
   const [files, setFiles] = useState<{ document?: File; presentation?: File }>(
     {}
   );
@@ -42,6 +48,53 @@ export default function UploadProjectClient({ session }: { session: any }) {
     },
   });
 
+  /** ✅ Generate tags via server action */
+  const handleGenerateTags = async () => {
+    const title = form.getValues("title").trim();
+    if (!title) return toast.error("Please enter a project title first.");
+
+    setIsGeneratingTags(true);
+    try {
+      const res = await generateProjectMetadata(title, "tags");
+      if (res.success && res.data) {
+        const generatedTags = res.data
+          .split(",")
+          .map((t: string) => t.trim().toLowerCase());
+        setTags(generatedTags);
+        toast.success("AI-generated tags added!");
+      } else {
+        toast.error("Failed to generate tags: " + res.error);
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Error generating tags.");
+    } finally {
+      setIsGeneratingTags(false);
+    }
+  };
+
+  /** ✅ Generate project description via server action */
+  const handleGenerateDescription = async () => {
+    const title = form.getValues("title").trim();
+    if (!title) return toast.error("Please enter a project title first.");
+
+    setIsGeneratingDescription(true);
+    try {
+      const res = await generateProjectMetadata(title, "description");
+      if (res.success) {
+        form.setValue("description", res.data);
+        toast.success("AI-generated description added!");
+      } else {
+        toast.error("Failed to generate description: " + res.error);
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Error generating description.");
+    } finally {
+      setIsGeneratingDescription(false);
+    }
+  };
+
   const handleAddTag = () => {
     const tag = tagInput.trim().toLowerCase();
     if (tag && !tags.includes(tag)) {
@@ -52,15 +105,15 @@ export default function UploadProjectClient({ session }: { session: any }) {
 
   const handleRemoveTag = (t: string) =>
     setTags(tags.filter((tag) => tag !== t));
+
   const handleFileChange = (key: "document" | "presentation", file?: File) =>
     setFiles((prev) => ({ ...prev, [key]: file }));
 
-  
+  /** ✅ Handle form submit */
   const onSubmit = (data: z.infer<typeof uploadProjectSchema>) => {
-    console.log("Submitting form with data:", data, "and files:", files);
     startTransition(async () => {
       try {
-        // ✅ Upload files directly to Cloudinary (avoid body size limit)
+        // Upload files to Cloudinary first
         const documentUrl = files.document
           ? await uploadFileToCloudinary(files.document, "project_docs")
           : undefined;
@@ -72,17 +125,20 @@ export default function UploadProjectClient({ session }: { session: any }) {
             )
           : undefined;
 
-        // ✅ Then send only metadata to your server action
+        // Then send metadata to your server action
         const result = await uploadProjectAction({
           ...data,
           tags,
           documentUrl,
           presentationUrl,
-          userId: session?.user?.id, // include if required by Prisma schema
+          userId: session?.user?.id,
         });
 
-        if (result.success) toast.success(result.message);
-        else toast.error(result.message);
+        if (result.success) {
+          toast.success(result.message);
+          form.reset();
+          setTags([]);
+        } else toast.error(result.message);
       } catch (err) {
         console.error(err);
         toast.error("Failed to upload project.");
@@ -100,9 +156,9 @@ export default function UploadProjectClient({ session }: { session: any }) {
           </CardHeader>
           <CardContent>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              {/* Title */}
+              {/* Project Title */}
               <div>
-                <Label className="mb-3">Project Title *</Label>
+                <Label className="mb-4">Project Title *</Label>
                 <Input
                   {...form.register("title")}
                   placeholder="e.g. AI Project Archive"
@@ -111,7 +167,24 @@ export default function UploadProjectClient({ session }: { session: any }) {
 
               {/* Description */}
               <div>
-                <Label className="mb-3">Description</Label>
+                <div className="flex items-center justify-between mb-4">
+                  <Label className="">Project Description</Label>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleGenerateDescription}
+                    disabled={isGeneratingDescription}
+                    className="gap-2"
+                  >
+                    {isGeneratingDescription ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Sparkles className="h-4 w-4" />
+                    )}
+                    Generate with AI
+                  </Button>
+                </div>
                 <Textarea
                   {...form.register("description")}
                   placeholder="Brief description..."
@@ -120,7 +193,7 @@ export default function UploadProjectClient({ session }: { session: any }) {
 
               {/* Links */}
               <div>
-                <Label className="mb-3">Website Link</Label>
+                <Label className="mb-4">Website Link</Label>
                 <Input
                   {...form.register("webLink")}
                   placeholder="https://yourproject.com"
@@ -128,7 +201,7 @@ export default function UploadProjectClient({ session }: { session: any }) {
               </div>
 
               <div>
-                <Label className="mb-3">GitHub Link</Label>
+                <Label className="mb-4">GitHub Link</Label>
                 <Input
                   {...form.register("githubLink")}
                   placeholder="https://github.com/..."
@@ -137,12 +210,11 @@ export default function UploadProjectClient({ session }: { session: any }) {
 
               {/* Document Upload */}
               <div className="space-y-2">
-                <Label htmlFor="document">
+                <Label className="mb-4">
                   Project Documentation (PDF, DOCX)
                 </Label>
                 <div className="flex items-center gap-2">
                   <Input
-                    id="document"
                     type="file"
                     accept=".pdf,.doc,.docx"
                     onChange={(e) =>
@@ -164,12 +236,9 @@ export default function UploadProjectClient({ session }: { session: any }) {
 
               {/* Presentation Upload */}
               <div className="space-y-2">
-                <Label htmlFor="presentation">
-                  Project Presentation (PPTX)
-                </Label>
+                <Label className="mb-4">Project Presentation (PPTX)</Label>
                 <div className="flex items-center gap-2">
                   <Input
-                    id="presentation"
                     type="file"
                     accept=".ppt,.pptx"
                     onChange={(e) =>
@@ -193,8 +262,26 @@ export default function UploadProjectClient({ session }: { session: any }) {
 
               {/* Tags */}
               <div>
-                <Label className="mb-3">Tags</Label>
-                <div className="flex gap-2">
+                <div className="flex items-center justify-between mb-4">
+                  <Label>Tags</Label>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleGenerateTags}
+                    disabled={isGeneratingTags}
+                    className="gap-2"
+                  >
+                    {isGeneratingTags ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Sparkles className="h-4 w-4" />
+                    )}
+                    Generate Tags
+                  </Button>
+                </div>
+
+                <div className="flex gap-2 mt-2">
                   <Input
                     value={tagInput}
                     onChange={(e) => setTagInput(e.target.value)}
@@ -207,6 +294,7 @@ export default function UploadProjectClient({ session }: { session: any }) {
                     Add
                   </Button>
                 </div>
+
                 <div className="flex flex-wrap gap-2 mt-2">
                   {tags.map((tag) => (
                     <Badge key={tag} variant="secondary" className="gap-1">
@@ -221,7 +309,11 @@ export default function UploadProjectClient({ session }: { session: any }) {
               </div>
 
               {/* Submit */}
-              <Button type="submit" disabled={isPending} className="w-full cursor-pointer">
+              <Button
+                type="submit"
+                disabled={isPending}
+                className="w-full cursor-pointer"
+              >
                 {isPending ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" /> Uploading...
