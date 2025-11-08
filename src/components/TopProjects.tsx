@@ -1,54 +1,54 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/button";
-import { Heart, ExternalLink, Github } from "lucide-react";
-
-// Missing import
-import { ArrowRight } from "lucide-react";
-
-const projects = [
-  {
-    id: 1,
-    title: "AI-Powered Study Assistant",
-    author: "Sarah Chen",
-    department: "Computer Science",
-    likes: 342,
-    tags: ["AI/ML", "Education", "NLP"],
-    gradient: "from-purple-500/20 to-pink-500/20",
-  },
-  {
-    id: 2,
-    title: "Smart Campus Navigation",
-    author: "Michael Torres",
-    department: "Software Engineering",
-    likes: 298,
-    tags: ["Mobile", "IoT", "React Native"],
-    gradient: "from-blue-500/20 to-cyan-500/20",
-  },
-  {
-    id: 3,
-    title: "Blockchain Voting System",
-    author: "Priya Sharma",
-    department: "Information Systems",
-    likes: 276,
-    tags: ["Blockchain", "Web3", "Security"],
-    gradient: "from-green-500/20 to-emerald-500/20",
-  },
-  {
-    id: 4,
-    title: "Mental Health Chatbot",
-    author: "James Wilson",
-    department: "Psychology & CS",
-    likes: 254,
-    tags: ["Healthcare", "AI", "Mobile"],
-    gradient: "from-orange-500/20 to-red-500/20",
-  },
-];
+import { ExternalLink, Github, ArrowRight } from "lucide-react";
+import Link from "next/link";
+import { getTopProjects } from "@/lib/profile/profile-actions";
 
 export const TopProjects = () => {
-  return (
+  const [projects, setProjects] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch top projects once when component mounts
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const res = await getTopProjects();
+        setProjects(res ?? []);
+      } catch (err: any) {
+        console.error("Error fetching top projects:", err);
+        setError("Failed to load projects");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    // fetchProjects();
+    setLoading(false);
+  }, []);
+
+  if (loading)
+    return (
+      <div className="flex justify-center items-center py-20 text-muted-foreground">
+        Loading top projects...
+      </div>
+    );
+
+  if (error)
+    return (
+      <div className="flex justify-center items-center py-20 text-destructive">
+        {error}
+      </div>
+    );
+
+  return projects.length > 0 ? (
     <section className="relative py-24 px-4 bg-gradient-to-b from-background via-primary/5 to-background">
       <div className="container mx-auto max-w-7xl">
+        {/* Section Header */}
         <div className="text-center space-y-4 mb-16 animate-fade-in">
           <h2 className="text-4xl md:text-5xl font-bold">
             Top Projects
@@ -59,16 +59,17 @@ export const TopProjects = () => {
           </p>
         </div>
 
+        {/* Projects Grid */}
         <div className="grid md:grid-cols-2 gap-6 mb-12 animate-slide-up">
-          {projects.map((project, index) => (
+          {projects.map((project: any, index: number) => (
             <Card
               key={project.id}
               className="group relative overflow-hidden bg-card/50 backdrop-blur-sm border-border/50 hover:border-primary/50 transition-all duration-300 glow-card"
               style={{ animationDelay: `${index * 100}ms` }}
             >
-              {/* Gradient background */}
+              {/* Gradient hover background */}
               <div
-                className={`absolute inset-0 bg-gradient-to-br ${project.gradient} opacity-0 group-hover:opacity-100 transition-opacity`}
+                className={`absolute inset-0 bg-gradient-to-br from-primary/10 to-secondary/10 opacity-0 group-hover:opacity-100 transition-opacity`}
               />
 
               <div className="relative p-6 space-y-4">
@@ -79,22 +80,14 @@ export const TopProjects = () => {
                       {project.title}
                     </h3>
                     <p className="text-sm text-muted-foreground">
-                      by {project.author} · {project.department}
+                      by {project.user?.name ?? "Anonymous"}
                     </p>
                   </div>
-
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="group-hover:bg-primary/10 transition-colors"
-                  >
-                    <Heart className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
-                  </Button>
                 </div>
 
                 {/* Tags */}
                 <div className="flex flex-wrap gap-2">
-                  {project.tags.map((tag) => (
+                  {project.tags?.map((tag: string) => (
                     <Badge
                       key={tag}
                       variant="secondary"
@@ -108,25 +101,35 @@ export const TopProjects = () => {
                 {/* Footer */}
                 <div className="flex items-center justify-between pt-4 border-t border-border/50">
                   <div className="flex items-center gap-2 text-muted-foreground">
-                    <Heart className="h-4 w-4 fill-current text-primary" />
-                    <span className="font-medium">{project.likes} likes</span>
+                    X
+                    <span className="font-medium">
+                      {project.likes ?? 0} likes
+                    </span>
                   </div>
 
                   <div className="flex gap-2">
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="h-8 group-hover:bg-primary/10 transition-colors"
-                    >
-                      <Github className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="h-8 group-hover:bg-primary/10 transition-colors"
-                    >
-                      <ExternalLink className="h-4 w-4" />
-                    </Button>
+                    {project.githubLink && (
+                      <Link href={project.githubLink} target="_blank">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-8 group-hover:bg-primary/10 transition-colors"
+                        >
+                          <Github className="h-4 w-4" />
+                        </Button>
+                      </Link>
+                    )}
+                    {project.webLink && (
+                      <Link href={project.webLink} target="_blank">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-8 group-hover:bg-primary/10 transition-colors"
+                        >
+                          <ExternalLink className="h-4 w-4" />
+                        </Button>
+                      </Link>
+                    )}
                   </div>
                 </div>
               </div>
@@ -134,20 +137,20 @@ export const TopProjects = () => {
           ))}
         </div>
 
+        {/* View All Button */}
         <div className="text-center">
-    
-          <a
-            href="/upload-project" // <- absolute route with leading slash
+          <Link
+            href="/projects"
             className="inline-flex items-center justify-center border-2 border-primary/30 bg-background/50
-                 backdrop-blur-sm text-[15px] px-5 py-2 rounded-md text-foreground
-                 hover:bg-primary/10 hover:border-primary/50 transition-all group "
-            aria-label="Upload your project"
+              backdrop-blur-sm text-[15px] px-5 py-2 rounded-md text-foreground
+              hover:bg-primary/10 hover:border-primary/50 transition-all group"
+            aria-label="View all projects"
           >
             View All Projects
             <ArrowRight className="ml-2 h-4 w-4" />
-          </a>
+          </Link>
         </div>
       </div>
     </section>
-  );
+  ) : null;
 };

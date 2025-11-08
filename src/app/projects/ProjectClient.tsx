@@ -17,7 +17,6 @@ import {
   Search,
   FileText,
   Presentation,
-  Filter,
 } from "lucide-react";
 import { getAllProjects } from "@/lib/project/project-actions";
 import { auth } from "@/lib/auth";
@@ -115,6 +114,7 @@ export default function Projects({ session }: { session: Session }) {
           </div>
         </div>
 
+        {/* Tags */}
         {allTags.length > 0 && (
           <div className="flex flex-wrap justify-center gap-2 mb-12">
             <Button
@@ -145,110 +145,101 @@ export default function Projects({ session }: { session: Session }) {
         ) : filteredProjects.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredProjects.map((p) => (
-              <Link key={p.id} href={`/projects/${p.id}`}>
+              <Card
+                key={p.id}
+                onClick={() => (window.location.href = `/projects/${p.id}`)}
+                className="cursor-pointer hover:shadow-xl transition-all duration-300 flex flex-col justify-between border-primary/10 bg-background/60 backdrop-blur-md"
+              >
+                <CardHeader>
+                  <CardTitle className="text-xl font-semibold mb-1 line-clamp-1">
+                    {p.title}
+                  </CardTitle>
+                  <CardDescription className="line-clamp-3 text-sm">
+                    {p.description || "No description available"}
+                  </CardDescription>
+                </CardHeader>
 
-                <Card
-                  key={p.id}
-                  className="hover:shadow-xl transition-all duration-300 flex flex-col justify-between border-primary/10 bg-background/60 backdrop-blur-md"
-                >
-                  <CardHeader>
-                    <CardTitle className="text-xl font-semibold mb-1 line-clamp-1">
-                      {p.title}
-                    </CardTitle>
-                    <CardDescription className="line-clamp-3 text-sm">
-                      {p.description || "No description available"}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="flex flex-col flex-1 justify-between gap-3">
-                    {p.tags && (
-                      <div className="flex flex-wrap gap-1.5 mb-3">
-                        {p.tags.map((t: string, i: number) => (
-                          <Badge
-                            key={i}
-                            variant="secondary"
-                            className="text-xs cursor-pointer hover:bg-primary hover:text-primary-foreground transition-all"
-                            onClick={() => setSelectedTag(t)}
-                          >
-                            {t}
-                          </Badge>
-                        ))}
-                      </div>
+                <CardContent className="flex flex-col flex-1 justify-between gap-3">
+                  {p.tags && (
+                    <div className="flex flex-wrap gap-1.5 mb-3">
+                      {p.tags.map((t: string, i: number) => (
+                        <Badge
+                          key={i}
+                          variant="secondary"
+                          className="text-xs cursor-pointer hover:bg-primary hover:text-primary-foreground transition-all"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedTag(t);
+                          }}
+                        >
+                          {t}
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* External Links */}
+                  <div className="flex flex-wrap gap-2 mt-auto">
+                    {p.webLink && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="flex-1"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          window.open(p.webLink, "_blank");
+                        }}
+                      >
+                        <ExternalLink className="h-4 w-4 mr-1" /> Website
+                      </Button>
                     )}
+                    {p.githubLink && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="flex-1"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          window.open(p.githubLink, "_blank");
+                        }}
+                      >
+                        <Github className="h-4 w-4 mr-1" /> GitHub
+                      </Button>
+                    )}
+                  </div>
 
-                    <div className="flex flex-wrap gap-2 mt-auto">
-                      {p.webLink && (
+                  {(p.documentUrl || p.presentationUrl) && (
+                    <div className="flex gap-2">
+                      {p.documentUrl && (
                         <Button
                           size="sm"
-                          variant="outline"
-                          asChild
+                          variant="ghost"
                           className="flex-1"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            window.open(p.documentUrl, "_blank");
+                          }}
                         >
-                          <a
-                            href={p.webLink}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            <ExternalLink className="h-4 w-4 mr-1" /> Website
-                          </a>
+                          <FileText className="h-4 w-4 mr-1" /> Document
                         </Button>
                       )}
-                      {p.githubLink && (
+                      {p.presentationUrl && (
                         <Button
                           size="sm"
-                          variant="outline"
-                          asChild
+                          variant="ghost"
                           className="flex-1"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            window.open(p.presentationUrl, "_blank");
+                          }}
                         >
-                          <a
-                            href={p.githubLink}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            <Github className="h-4 w-4 mr-1" /> GitHub
-                          </a>
+                          <Presentation className="h-4 w-4 mr-1" /> Slides
                         </Button>
                       )}
                     </div>
-
-                    {(p.documentUrl || p.presentationUrl) && (
-                      <div className="flex gap-2">
-                        {p.documentUrl && (
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            asChild
-                            className="flex-1"
-                          >
-                            <a
-                              href={p.documentUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              <FileText className="h-4 w-4 mr-1" /> Document
-                            </a>
-                          </Button>
-                        )}
-                        {p.presentationUrl && (
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            asChild
-                            className="flex-1"
-                          >
-                            <a
-                              href={p.presentationUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              <Presentation className="h-4 w-4 mr-1" /> Slides
-                            </a>
-                          </Button>
-                        )}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </Link>
+                  )}
+                </CardContent>
+              </Card>
             ))}
           </div>
         ) : (

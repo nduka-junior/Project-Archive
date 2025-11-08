@@ -37,15 +37,14 @@ export const Hero = () => {
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 pt-4">
-            <Button
-              size="lg"
-              className="group relative overflow-hidden bg-gradient-to-r from-primary to-primary-glow text-lg px-8 py-6 shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/40 transition-all"
+            <a
+              href="/projects"
+              className=" flex  items-center text-xl mr-5 hover:text-[#797979] "
             >
-              Browse Top Projects
-              <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
-            </Button>
+              <span> Browse top Projects</span>
+              <ArrowRight className="ml-2 h-6 w-6 " />
+            </a>
 
-         
             <a
               href="/upload-project" // <- absolute route with leading slash
               className="inline-flex items-center justify-center border-2 border-primary/30 bg-background/50
@@ -59,7 +58,7 @@ export const Hero = () => {
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-3 gap-8 pt-12 w-full max-w-2xl">
+          {/* <div className="grid grid-cols-3 gap-8 pt-12 w-full max-w-2xl">
             <div className="space-y-2">
               <div className="text-3xl md:text-4xl font-bold gradient-text">
                 1000+
@@ -78,7 +77,7 @@ export const Hero = () => {
               </div>
               <div className="text-sm text-muted-foreground">Universities</div>
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
     </section>

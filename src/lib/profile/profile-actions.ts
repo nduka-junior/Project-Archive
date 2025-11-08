@@ -74,3 +74,18 @@ export async function getUserProfile() {
 
   return user?.profile ?? null;
 }
+
+
+export const getTopProjects = async () => {
+  try {
+    const projects = await prisma.project.findMany({
+      take: 4,
+      orderBy: { createdAt: "desc" },
+      include: { user: true },
+    });
+    return projects;
+  } catch (error) {
+    console.error("Error fetching top projects:", error);
+    return [];
+  }
+};
