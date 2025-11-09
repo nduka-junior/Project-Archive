@@ -8,6 +8,7 @@ import { ExternalLink, Github, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { getTopProjects } from "@/lib/profile/profile-actions";
 
+
 export const TopProjects = () => {
   const [projects, setProjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
