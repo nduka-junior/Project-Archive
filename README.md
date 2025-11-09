@@ -1,36 +1,99 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+Sure 👌 here’s a professional **README.md** for your **Project Archive** web app — written like *you* made it, clean enough for GitHub or your resume:
 
-## Getting Started
+---
 
-First, run the development server:
+# 📚 Project Archive
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+**Project Archive** is a full-stack web application designed to help students **submit, store, and showcase** their final year projects in a centralized digital repository. It allows lecturers to **review and assess** submissions, while linking each project to its **corresponding GitHub repository** for code transparency and collaboration.
+
+---
+
+## 🚀 Features
+
+* 🧾 **Project Uploads:** Students can submit their final year projects along with descriptions, documentation, and GitHub links.
+* 🧠 **Search & Filter:** Browse and filter through projects by title, department, or technology used.
+* 🧑‍🏫 **Lecturer Dashboard:** Admin view for assessing and approving submitted projects.
+* 🗃️ **GitHub Integration:** Each project includes its associated GitHub repo for code review.
+* 🧩 **Responsive UI:** Fully responsive interface built with modern UI components.
+
+---
+
+## 🧰 Tech Stack
+
+**Frontend:**
+
+* Next.js 14 (App Router)
+* React
+* TypeScript
+* Tailwind CSS
+* ShadCN UI
+
+**Backend:**
+
+* Supabase (Database + Authentication)
+* Drizzle ORM
+* Node.js
+
+**Additional Tools:**
+
+* ESLint & Prettier for linting and formatting
+* Vercel for deployment
+
+---
+
+## ⚙️ Installation
+
+1. **Clone the repository:**
+
+   ```bash
+   git clone https://github.com/nduka-junior/project-archive.git
+   cd project-archive
+   ```
+
+2. **Install dependencies:**
+
+   ```bash
+   npm install
+   ```
+
+3. **Create environment variables:**
+   Create a `.env.local` file and include your Supabase credentials:
+
+   ```env
+   NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+   ```
+
+4. **Run the development server:**
+
+   ```bash
+   npm run dev
+   ```
+
+5. **Open your browser:**
+   Visit 👉 [http://localhost:3000](http://localhost:3000)
+
+---
+
+## 🧩 Folder Structure
+
+```
+src/
+ ┣ components/      # UI and reusable components
+ ┣ app/             # Next.js app router pages and routes
+ ┣ lib/             # Supabase, Drizzle, and config helpers
+ ┣ hooks/           # Custom React hooks
+ ┣ styles/          # Global styles
+ ┗ utils/           # Helper functions
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🧠 Future Improvements
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+* ✅ Project categorization using AI-based tags
+* ✅ User profiles with project statistics
+* ✅ Admin-level analytics dashboard
+* ✅ Improved search with semantic understanding
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
